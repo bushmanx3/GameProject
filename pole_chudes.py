@@ -3,6 +3,7 @@ import random
 import math
 import json
 import os
+from datetime import datetime
 
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout,
@@ -36,10 +37,15 @@ class SpinWheelWidget(QGraphicsView):
         self.setDragMode(QGraphicsView.DragMode.NoDrag)
         self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorViewCenter)
         self.setResizeAnchor(QGraphicsView.ViewportAnchor.AnchorViewCenter)
-        self.centerOn(self.sceneRect().center())
+
+        # Важно: устанавливаем область сцены
+        self.scene.setSceneRect(0, 0, 500, 500)
+
+        # Центрируем вид
+        self.centerOn(250, 250)
 
         self._rotation = 0.0
-        self.center = QPointF(200, 220)
+        self.center = QPointF(250, 250)  # Сместил центр в центр виджета
         self._spin_callback = None
 
         self.anim = QPropertyAnimation(self, b"rotation")
@@ -50,12 +56,24 @@ class SpinWheelWidget(QGraphicsView):
         self._build_wheel()
 
     def wheelEvent(self, event):
-        # Отключаем зум колесиком мыши
         event.ignore()
 
     def mousePressEvent(self, event):
-        # Отключаем перетаскивание барабана
         event.ignore()
+
+    def resizeEvent(self, event):
+        """При изменении размера перецентрируем колесо"""
+        super().resizeEvent(event)
+        self.centerOn(self.scene.sceneRect().center())
+        self.center = QPointF(self.width() / 2, self.height() / 2)
+        self._build_wheel()  # Перестраиваем колесо с новым центром
+
+    def showEvent(self, event):
+        """При показе виджета центрируем колесо"""
+        super().showEvent(event)
+        self.centerOn(self.scene.sceneRect().center())
+        self.center = QPointF(self.width() / 2, self.height() / 2)
+        self._build_wheel()
 
     def _build_wheel(self):
         self.scene.clear()
@@ -123,6 +141,10 @@ class SpinWheelWidget(QGraphicsView):
         cap.setFlag(QGraphicsPathItem.GraphicsItemFlag.ItemIsMovable, False)
         self.wheel_group.addToGroup(cap)
 
+        # Сбрасываем вращение при перестроении
+        self._rotation = 0
+        self.wheel_group.setTransform(QTransform())
+
     def getRotation(self):
         return self._rotation
 
@@ -141,24 +163,31 @@ class SpinWheelWidget(QGraphicsView):
         n = len(self.sectors)
         chosen_index = random.randrange(n)
 
-        # Угол одного сектора
+        # Угол наклона указателя (сверху, 270 градусов)
+        pointer_angle = 270
         angle_per_sector = 360 / n
 
-        # Расчет угла для остановки:
-        # 1. Сектора отрисованы от 0 градусов (справа) ПО часовой стрелке.
-        # 2. Стрелка находится сверху (на 270 градусах).
-        # 3. Чтобы сектор 'i' оказался под стрелкой, нам нужно повернуть барабан
-        #    на угол: 270 - (угол начала сектора + половина сектора)
+        # Вычисляем угол, на который нужно повернуть колесо,
+        # чтобы выбранный сектор оказался под указателем
+        sector_center_angle = chosen_index * angle_per_sector + angle_per_sector / 2
 
-        sector_center_angle = (chosen_index * angle_per_sector) + (angle_per_sector / 2)
-        target_normalized = (270 - sector_center_angle) % 360
+        # Вычисляем необходимый поворот колеса
+        target_rotation = (pointer_angle - sector_center_angle) % 360
 
-        # Добавляем несколько полных оборотов для эффекта анимации
-        # ВАЖНО: вычитаем, так как вращение в анимации идет по нарастающей
-        total_rotation = (360 * random.randint(5, 8)) + target_normalized
+        # Делаем несколько полных оборотов (от 3 до 8) и добавляем целевой угол
+        full_rotations = random.randint(3, 8) * 360
+        total_rotation = full_rotations + target_rotation
 
+        # Корректируем начальное значение анимации
+        current_rot = self._rotation % 360
+        # Вычисляем, сколько нужно довернуть от текущего положения
+        delta = total_rotation - current_rot
+        if delta < 0:
+            delta += 360
+
+        # Устанавливаем конечное значение анимации
         self.anim.setStartValue(self._rotation)
-        self.anim.setEndValue(self._rotation + total_rotation)
+        self.anim.setEndValue(self._rotation + delta)
         self.anim.start()
 
         self._chosen_sector = self.sectors[chosen_index]
@@ -191,20 +220,6 @@ class PoleChudesApp(QMainWindow):
 
         # Загрузка вопросов из JSON файла
         self.words_db = self.load_questions_from_json()
-
-        if not self.words_db:
-            QMessageBox.critical(
-                self,
-                "Ошибка загрузки вопросов",
-                "Не удалось загрузить вопросы из файла 'questions.json'.\n"
-                "Пожалуйста, создайте файл с вопросами и перезапустите игру.\n\n"
-                "Формат файла:\n"
-                "{\n"
-                '  "questions": [\n'
-                '    {"question": "Вопрос", "answer": "ОТВЕТ"}\n'
-                "  ]\n"
-                "}"
-            )
 
         # Только основные сектора
         self.sectors = ["100", "200", "500", "1000", "БАНКРОТ", "0"]
@@ -620,23 +635,33 @@ class PoleChudesApp(QMainWindow):
 
         self.game_data = self.round_questions[self.current_round]
         self.current_word = self.game_data["a"]
-        self.guessed_letters = []
+        self.guessed_letters = []  # Сбрасываем список открытых букв в начале раунда
         self.current_sector = "-"
 
+        # Обновляем отображение интерфейса
         self.round_label.setText(f"РАУНД {self.current_round + 1}")
         self.score_info_label.setText(f"Слово из {len(self.current_word)} букв")
         self.lbl_question.setText(f"Вопрос: {self.game_data['q']}")
         self.lbl_sector.setText("Сектор: -")
+
+        # Обновляем отображение слова (все буквы скрыты)
         self.update_word_display()
+        # Обновляем состояние UI (подсветка текущего игрока, счётчики и т. д.)
         self.update_ui_state()
+
+        # Блокируем алфавит в начале раунда — буквы нельзя нажимать до вращения барабана
         self.toggle_alphabet(False)
+        # Разрешаем вращение барабана
         self.btn_spin.setEnabled(True)
+        # Разрешаем кнопку «Назвать слово»
         self.btn_full_word.setEnabled(True)
 
         QMessageBox.information(
             self,
             f"Начало {self.current_round + 1} раунда",
-            f"Вопрос: {self.game_data['q']}\n\nСлово состоит из {len(self.current_word)} букв.\n\nПервый ходит Игрок 1."
+            f"Вопрос: {self.game_data['q']}\n\n"
+            f"Слово состоит из {len(self.current_word)} букв.\n\n"
+            f"Первый ходит Игрок 1."
         )
 
         self.central_stack.setCurrentIndex(3)
@@ -646,13 +671,16 @@ class PoleChudesApp(QMainWindow):
             self.player_score_labels[i].setText(f"В раунде: {self.round_scores[self.current_round][i]}")
 
     def update_word_display(self):
+        # Очищаем текущие ячейки
         for i in reversed(range(self.word_layout.count())):
             item = self.word_layout.itemAt(i)
             if item and item.widget():
                 item.widget().setParent(None)
 
+        # Создаем ячейки для каждой буквы слова
         for char in self.current_word:
-            lbl = QLabel(char if char in self.guessed_letters else "")
+            display_char = char if char in self.guessed_letters else ""
+            lbl = QLabel(display_char)
             lbl.setFixedSize(54, 54)
             lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
             lbl.setStyleSheet("""
@@ -675,37 +703,68 @@ class PoleChudesApp(QMainWindow):
         self.lbl_sector.setText(f"Сектор: {sector}")
 
         if sector == "БАНКРОТ":
+            # Обнуляем очки текущего игрока за текущий раунд
             self.round_scores[self.current_round][self.current_player_idx] = 0
+
+            # Обновляем общий счет игрока (пересчитываем из всех раундов)
+            total_score = 0
+            for round_num in range(3):
+                total_score += self.round_scores[round_num][self.current_player_idx]
+            self.players[self.current_player_idx]["score"] = total_score
+
             self.update_round_scores_display()
             self.update_ui_state()
+
+            QMessageBox.warning(
+                self,
+                "БАНКРОТ!",
+                f"{self.players[self.current_player_idx]['name']} выпал БАНКРОТ!\n"
+                f"Все очки за текущий раунд сгорают!"
+            )
+
             self.next_turn()
             return
 
         if sector == "0":
+            QMessageBox.information(self, "Сектор 0", "Вы ничего не выиграли. Ход переходит следующему игроку.")
             self.next_turn()
             return
 
         self.toggle_alphabet(True)
 
     def guess_letter(self, char):
+        # Проверяем, не была ли буква уже открыта (угаданная или неугаданная)
+        if char in self.guessed_letters:
+            QMessageBox.warning(self, "Буква уже открыта", f"Буква '{char}' уже была открыта ранее!")
+            return
+
+        # Блокируем кнопку выбранной буквы в любом случае
         self.alpha_buttons[char].setEnabled(False)
+        # Добавляем букву в список открытых — теперь она не будет доступна для выбора
+        self.guessed_letters.append(char)
 
         if char in self.current_word:
-            self.guessed_letters.append(char)
+            # Буква есть в слове — считаем количество вхождений
             count = self.current_word.count(char)
 
             # Проверяем, является ли сектор числовым (не БАНКРОТ и не 0)
             if str(self.current_sector).isdigit():
                 # Получаем числовое значение сектора
                 points_per_letter = int(self.current_sector)
-                # Итоговые очки = значение сектора * количество открытых букв
+                # Итоговые очки = значение сектора × количество открытых букв
                 total_points = points_per_letter * count
 
-                # Прибавляем очки в текущий раунд и в общий зачет
+                # Прибавляем очки в текущий раунд
                 self.round_scores[self.current_round][self.current_player_idx] += total_points
-                self.players[self.current_player_idx]["score"] += total_points
+
+                # Обновляем общий счёт игрока (пересчитываем из всех раундов)
+                total_score = 0
+                for round_num in range(3):
+                    total_score += self.round_scores[round_num][self.current_player_idx]
+                self.players[self.current_player_idx]["score"] = total_score
 
                 self.update_round_scores_display()
+                self.update_ui_state()
 
                 QMessageBox.information(
                     self,
@@ -714,14 +773,23 @@ class PoleChudesApp(QMainWindow):
                     f"Сектор: {points_per_letter}. Вы получили {total_points} очков!"
                 )
 
+            # Обновляем отображение слова — теперь открытая буква видна
             self.update_word_display()
             self.update_ui_state()
 
-            # Проверка на полную победу в раунде
+            # Проверка на полную победу в раунде (все буквы отгаданы)
             if all(c in self.guessed_letters for c in self.current_word):
                 bonus = 500
                 self.round_scores[self.current_round][self.current_player_idx] += bonus
-                self.players[self.current_player_idx]["score"] += bonus
+
+                # Обновляем общий счёт игрока
+                total_score = 0
+                for round_num in range(3):
+                    total_score += self.round_scores[round_num][self.current_player_idx]
+                self.players[self.current_player_idx]["score"] = total_score
+
+                self.update_round_scores_display()
+                self.update_ui_state()
 
                 QMessageBox.information(
                     self,
@@ -730,16 +798,23 @@ class PoleChudesApp(QMainWindow):
                     f"Бонус за победу в раунде: {bonus} очков!"
                 )
 
+                # Переходим к следующему раунду
                 self.current_round += 1
                 self.start_round()
                 return
 
-            # Если угадал, игрок крутит барабан снова (не переключаем ход)
-            self.toggle_alphabet(False)
-            self.btn_spin.setEnabled(True)
+            # Если буква угадана, игрок крутит барабан снова (ход не передаётся)
+            self.toggle_alphabet(False)  # Блокируем алфавит до следующего вращения
+            self.btn_spin.setEnabled(True)  # Разрешаем вращение барабана
 
         else:
-            QMessageBox.warning(self, "Нет такой буквы", f"Буквы '{char}' нет в слове!")
+            # Буквы нет в слове
+            QMessageBox.warning(
+                self,
+                "Нет такой буквы",
+                f"Буквы '{char}' нет в слове!\nБуква '{char}' больше недоступна."
+            )
+            # Передаём ход следующему игроку
             self.next_turn()
 
     def guess_full_word(self):
@@ -753,11 +828,18 @@ class PoleChudesApp(QMainWindow):
             return
 
         if answer == self.current_word:
+            # Добавляем все буквы слова в список открытых — это заблокирует их в алфавите
             self.guessed_letters = list(set(self.current_word))
             bonus = 1000
             self.round_scores[self.current_round][self.current_player_idx] += bonus
-            self.players[self.current_player_idx]["score"] += bonus
-            self.update_word_display()
+
+            # Обновляем общий счёт игрока
+            total_score = 0
+            for round_num in range(3):
+                total_score += self.round_scores[round_num][self.current_player_idx]
+            self.players[self.current_player_idx]["score"] = total_score
+
+            self.update_word_display()  # Обновляем отображение слова — теперь все буквы видны
             self.update_round_scores_display()
             self.update_ui_state()
 
@@ -775,28 +857,84 @@ class PoleChudesApp(QMainWindow):
             self.next_turn()
 
     def show_final_results(self):
+        # Находим победителя (игрока с максимальным количеством очков)
         max_score = max(self.players, key=lambda x: x["score"])["score"]
         winners = [p for p in self.players if p["score"] == max_score]
 
+        # Сортируем игроков по очкам для отображения
+        sorted_players = sorted(self.players, key=lambda x: x["score"], reverse=True)
+
+        # Формируем подробный результат игры
+        results_text = "РЕЗУЛЬТАТЫ ИГРЫ:\n\n"
+        for i, player in enumerate(sorted_players, 1):
+            medal = "🥇" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else "📌"
+            results_text += f"{medal} {player['name']}: {player['score']} очков\n"
+
+        results_text += f"\nОчки по раундам:\n"
+        for i, player in enumerate(self.players):
+            results_text += f"\n{player['name']}:\n"
+            for round_num in range(3):
+                results_text += f"  Раунд {round_num + 1}: {self.round_scores[round_num][i]} очков\n"
+
+        # Определяем победителя/победителей
         if len(winners) == 1:
             winner = winners[0]
-            QMessageBox.information(
-                self,
-                "Игра окончена",
-                f"🏆 ПОБЕДИТЕЛЬ ИГРЫ 🏆\n\n"
-                f"{winner['name']} набрал {winner['score']} очков!\n\n"
-                f"Поздравляем!"
+            title = "🏆 ПОБЕДИТЕЛЬ ИГРЫ! 🏆"
+            message = (
+                f"{title}\n\n"
+                f"{winner['name']} одержал победу!\n"
+                f"Набрано очков: {winner['score']}\n\n"
+                f"{results_text}"
             )
         else:
-            QMessageBox.information(
-                self,
-                "Ничья!",
-                f"У нескольких игроков одинаковый счет: {max_score} очков.\n"
-                f"Победители: {', '.join([w['name'] for w in winners])}!"
+            title = "🤝 НИЧЬЯ! 🤝"
+            winners_names = ", ".join([w['name'] for w in winners])
+            message = (
+                f"{title}\n\n"
+                f"Победители: {winners_names}\n"
+                f"Набрано очков: {max_score}\n\n"
+                f"{results_text}"
             )
 
+        # Показываем диалоговое окно с результатами
+        QMessageBox.information(self, "Игра окончена", message)
+
+        # Сохраняем результаты игры
         self.save_game_results()
+
+        # Сбрасываем состояние игры для следующей игры
+        self.reset_game_state()
+
+        # Возвращаемся в главное меню
         self.central_stack.setCurrentIndex(0)
+
+    def reset_game_state(self):
+        """Сброс состояния игры для следующей игры"""
+        # Сбрасываем очки игроков
+        for i in range(3):
+            self.players[i]["score"] = 0
+
+        # Сбрасываем данные раундов
+        self.current_round = 0
+        self.round_scores = [[0, 0, 0] for _ in range(3)]
+        self.round_questions = []
+
+        # Сбрасываем текущие игровые переменные
+        self.current_word = ""
+        self.guessed_letters = []
+        self.current_sector = "-"
+        self.current_player_idx = 0
+
+        # Обновляем отображение в игре (на случай, если игрок захочет начать новую игру)
+        self.update_word_display()
+        self.update_ui_state()
+
+        # Блокируем алфавит
+        self.toggle_alphabet(False)
+
+        # Отключаем кнопки
+        self.btn_spin.setEnabled(False)
+        self.btn_full_word.setEnabled(False)
 
     def save_game_results(self):
         try:
@@ -807,7 +945,7 @@ class PoleChudesApp(QMainWindow):
                     results = json.load(f)
 
             game_result = {
-                "date": str(__import__('datetime').datetime.now()),
+                "date": str(datetime.now()),
                 "players": self.players,
                 "rounds": self.round_scores
             }
@@ -839,8 +977,11 @@ class PoleChudesApp(QMainWindow):
 
     def toggle_alphabet(self, state):
         for btn in self.alpha_buttons.values():
-            if btn.text() not in self.guessed_letters:
+            char = btn.text()
+            if char not in self.guessed_letters:  # Если буква ещё не открыта
                 btn.setEnabled(state)
+            else:  # Буква уже открыта (угаданная или неугаданная)
+                btn.setEnabled(False)
 
 
 if __name__ == "__main__":
