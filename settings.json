@@ -1,6 +1,3 @@
 {
-    "rounds": 3,
-    "difficulty": "Средняя",
-    "sound": true,
-    "theme": "Темная"
+  "theme": "dark"
 }
