@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout, QLabel, QPushButton, QStackedWidget,
     QGridLayout, QMessageBox, QFrame, QGraphicsView,
     QGraphicsScene, QGraphicsPathItem, QGraphicsTextItem,
-    QInputDialog, QSlider, QCheckBox, QComboBox, QGroupBox
+    QInputDialog, QComboBox, QScrollArea,QCheckBox, QGroupBox
 )
 from PyQt6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QPointF, pyqtProperty, QRectF
 from PyQt6.QtGui import (
@@ -268,15 +268,6 @@ class PoleChudesApp(QMainWindow):
                     padding: 0 5px 0 5px;
                     color: #ffd166;
                 }
-                QCheckBox { color: #f5f7ff; }
-                QCheckBox::indicator { 
-                    width: 18px; 
-                    height: 18px; 
-                    border-radius: 4px; 
-                    border: 2px solid #334155; 
-                    background: #1f2937; 
-                }
-                QCheckBox::indicator:checked { background: #2d6cdf; }
                 QComboBox { 
                     background-color: #1f2937; 
                     border: 1px solid #334155; 
@@ -288,16 +279,9 @@ class PoleChudesApp(QMainWindow):
                     background-color: #1f2937;
                     color: #f5f7ff;
                 }
-                QMessageBox {
-                    background-color: #1f2937;
-                    color: #f5f7ff;
-                }
-                QInputDialog {
-                    background-color: #1f2937;
-                    color: #f5f7ff;
-                }
+                QScrollArea { background: transparent; border: none; }
             """)
-            # Обновляем стиль игровой страницы для темной темы
+
             if hasattr(self, 'game_page'):
                 self.game_page.setStyleSheet("""
                     background-color: #121826;
@@ -305,7 +289,6 @@ class PoleChudesApp(QMainWindow):
                     QFrame { color: #f5f7ff; }
                 """)
 
-            # Стиль для кнопки "Крутите барабан" в темной теме
             if hasattr(self, 'btn_spin'):
                 self.btn_spin.setStyleSheet("""
                     QPushButton {
@@ -326,7 +309,6 @@ class PoleChudesApp(QMainWindow):
                     }
                 """)
 
-            # Стиль для кнопки "Назвать слово" в темной теме
             if hasattr(self, 'btn_full_word'):
                 self.btn_full_word.setStyleSheet("""
                     QPushButton {
@@ -347,7 +329,6 @@ class PoleChudesApp(QMainWindow):
                     }
                 """)
 
-            # Обновляем стиль фрейма вопроса для темной темы
             if hasattr(self, 'question_frame'):
                 self.question_frame.setStyleSheet("""
                     background-color: #1e293b;
@@ -357,7 +338,6 @@ class PoleChudesApp(QMainWindow):
                 """)
                 self.lbl_question.setStyleSheet("color: #e2e8f0; font-size: 18px;")
 
-            # Обновляем стиль остальных элементов для темной темы
             if hasattr(self, 'lbl_sector'):
                 self.lbl_sector.setStyleSheet("""
                     background-color: #334155;
@@ -372,7 +352,6 @@ class PoleChudesApp(QMainWindow):
             if hasattr(self, 'score_info_label'):
                 self.score_info_label.setStyleSheet("color: #93c5fd; font-size: 14px;")
 
-            # Обновляем стиль кнопок букв для темной темы
             if hasattr(self, 'alpha_buttons'):
                 for btn in self.alpha_buttons.values():
                     btn.setStyleSheet("""
@@ -393,7 +372,6 @@ class PoleChudesApp(QMainWindow):
                         }
                     """)
 
-            # Обновляем стиль фреймов игроков для темной темы
             if hasattr(self, 'player_frames'):
                 for i, frame in enumerate(self.player_frames):
                     if i == self.current_player_idx:
@@ -439,15 +417,6 @@ class PoleChudesApp(QMainWindow):
                     padding: 0 5px 0 5px;
                     color: #e67e22;
                 }
-                QCheckBox { color: #1a1a2e; }
-                QCheckBox::indicator { 
-                    width: 18px; 
-                    height: 18px; 
-                    border-radius: 4px; 
-                    border: 2px solid #d0d3d4; 
-                    background: #ffffff; 
-                }
-                QCheckBox::indicator:checked { background: #3498db; }
                 QComboBox { 
                     background-color: #ffffff; 
                     border: 1px solid #d0d3d4; 
@@ -459,22 +428,9 @@ class PoleChudesApp(QMainWindow):
                     background-color: #ffffff;
                     color: #1a1a2e;
                 }
-                QMessageBox {
-                    background-color: #ffffff;
-                    color: #1a1a2e;
-                }
-                QMessageBox QLabel {
-                    color: #1a1a2e;
-                }
-                QInputDialog {
-                    background-color: #ffffff;
-                    color: #1a1a2e;
-                }
-                QInputDialog QLabel {
-                    color: #1a1a2e;
-                }
+                QScrollArea { background: transparent; border: none; }
             """)
-            # Обновляем стиль игровой страницы для светлой темы
+
             if hasattr(self, 'game_page'):
                 self.game_page.setStyleSheet("""
                     background-color: #f0f2f5;
@@ -482,7 +438,6 @@ class PoleChudesApp(QMainWindow):
                     QFrame { color: #1a1a2e; }
                 """)
 
-            # Стиль для кнопки "Крутите барабан" в светлой теме
             if hasattr(self, 'btn_spin'):
                 self.btn_spin.setStyleSheet("""
                     QPushButton {
@@ -503,7 +458,6 @@ class PoleChudesApp(QMainWindow):
                     }
                 """)
 
-            # Стиль для кнопки "Назвать слово" в светлой теме
             if hasattr(self, 'btn_full_word'):
                 self.btn_full_word.setStyleSheet("""
                     QPushButton {
@@ -524,7 +478,6 @@ class PoleChudesApp(QMainWindow):
                     }
                 """)
 
-            # Обновляем стиль фрейма вопроса для светлой темы
             if hasattr(self, 'question_frame'):
                 self.question_frame.setStyleSheet("""
                     background-color: #ffffff;
@@ -549,7 +502,6 @@ class PoleChudesApp(QMainWindow):
             if hasattr(self, 'score_info_label'):
                 self.score_info_label.setStyleSheet("color: #2980b9; font-size: 14px;")
 
-            # Обновляем стиль кнопок букв для светлой темы
             if hasattr(self, 'alpha_buttons'):
                 for btn in self.alpha_buttons.values():
                     btn.setStyleSheet("""
@@ -570,7 +522,6 @@ class PoleChudesApp(QMainWindow):
                         }
                     """)
 
-            # Обновляем стиль фреймов игроков для светлой темы
             if hasattr(self, 'player_frames'):
                 for i, frame in enumerate(self.player_frames):
                     if i == self.current_player_idx:
@@ -607,24 +558,141 @@ class PoleChudesApp(QMainWindow):
         except:
             return []
 
+    # ==================== ТАБЛИЦА ЛИДЕРОВ ====================
+
+    def load_leaderboard(self):
+        """Загрузка таблицы лидеров из файла (только топ-3)"""
+        try:
+            if os.path.exists("leaderboard.json"):
+                with open("leaderboard.json", 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        return data[:3]
+            return []
+        except:
+            return []
+
+    def save_to_leaderboard(self):
+        """Сохраняет результат победителя, обновляет топ-3"""
+        # Определяем победителя
+        max_score = max(self.players, key=lambda x: x["score"])["score"]
+        winners = [p for p in self.players if p["score"] == max_score]
+
+        if not winners:
+            return
+
+        winner = winners[0]
+
+        # Загружаем существующую таблицу
+        leaderboard = self.load_leaderboard()
+
+        # Добавляем нового победителя
+        leaderboard.append({
+            "name": winner["name"],
+            "score": winner["score"],
+            "date": datetime.now().strftime("%d.%m.%Y")
+        })
+
+        # Сортируем по очкам (по убыванию)
+        leaderboard.sort(key=lambda x: x["score"], reverse=True)
+
+        # Оставляем только топ-3
+        leaderboard = leaderboard[:3]
+
+        # Сохраняем
+        try:
+            with open("leaderboard.json", 'w', encoding='utf-8') as f:
+                json.dump(leaderboard, f, ensure_ascii=False, indent=2)
+        except:
+            pass
+
+        # Обновляем отображение
+        self.update_leaderboard_display()
+
+        # Проверяем, побит ли рекорд
+        if leaderboard and winner["score"] == leaderboard[0]["score"] and len(leaderboard) > 0:
+            QMessageBox.information(self, "🏆 НОВЫЙ РЕКОРД! 🏆",
+                                    f"{winner['name']} установил(а) новый рекорд!\n\n"
+                                    f"{winner['score']} очков - это лучший результат за всё время!")
+
+    def update_leaderboard_display(self):
+        """Обновляет отображение таблицы лидеров (только топ-3)"""
+        leaderboard = self.load_leaderboard()
+
+        if not leaderboard:
+            self.leaderboard_text.setText("🏆 ТАБЛИЦА ЛИДЕРОВ 🏆\n\n"
+                                          "Пока нет результатов.\n"
+                                          "Сыграйте и установите рекорд!")
+            return
+
+        text = "🏆 ТАБЛИЦА ЛИДЕРОВ 🏆\n\n"
+        text += "═══ ЛУЧШИЕ РЕЗУЛЬТАТЫ ═══\n\n"
+
+        for i, entry in enumerate(leaderboard, 1):
+            if i == 1:
+                medal = "🥇 1-е место"
+                medal_color = "🏆"
+            elif i == 2:
+                medal = "🥈 2-е место"
+                medal_color = "⭐"
+            else:
+                medal = "🥉 3-е место"
+                medal_color = "✨"
+
+            name = entry["name"][:20]
+            score = entry["score"]
+            date = entry.get("date", "")
+
+            text += f"{medal_color} {medal}\n"
+            text += f"   👤 {name}\n"
+            text += f"   📊 {score} очков\n"
+            if date:
+                text += f"   📅 {date}\n"
+            text += "\n"
+            text += "────────────────────\n\n"
+
+        # Рекордная информация
+        if leaderboard:
+            record = leaderboard[0]["score"]
+            text += f"\n🔥 РЕКОРД ВСЕХ ВРЕМЕН: {record} очков 🔥"
+
+        self.leaderboard_text.setText(text)
+
+    def clear_leaderboard(self):
+        """Очищает таблицу лидеров"""
+        reply = QMessageBox.question(
+            self,
+            "Очистка таблицы",
+            "Вы уверены, что хотите очистить таблицу лидеров?\nЭто действие нельзя отменить.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        if reply == QMessageBox.StandardButton.Yes:
+            try:
+                with open("leaderboard.json", 'w', encoding='utf-8') as f:
+                    json.dump([], f)
+                self.update_leaderboard_display()
+                QMessageBox.information(self, "Готово", "Таблица лидеров очищена!")
+            except Exception as e:
+                QMessageBox.warning(self, "Ошибка", f"Не удалось очистить таблицу: {e}")
+
+    # ==================== ЭКРАНЫ ====================
+
     def init_menu_screen(self):
         page = QWidget()
         layout = QVBoxLayout(page)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.setSpacing(20)
 
-        # Заголовок "ПОЛЕ ЧУДЕС" по центру
         title = QLabel("ПОЛЕ ЧУДЕС")
         title.setObjectName("titleLabel")
         title.setFont(QFont("Arial", 40, QFont.Weight.Bold))
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        # Подзаголовок "Главное меню" по центру
         subtitle = QLabel("Главное меню")
         subtitle.setFont(QFont("Arial", 18))
         subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        # Контейнер для кнопок, чтобы выровнять их по центру
         buttons_layout = QVBoxLayout()
         buttons_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         buttons_layout.setSpacing(12)
@@ -651,7 +719,6 @@ class PoleChudesApp(QMainWindow):
         buttons_layout.addWidget(btn_leaders)
         buttons_layout.addWidget(btn_exit)
 
-        # Добавляем все элементы в главный layout с отступами
         layout.addStretch(1)
         layout.addWidget(title)
         layout.addSpacing(10)
@@ -671,11 +738,9 @@ class PoleChudesApp(QMainWindow):
         title.setFont(QFont("Arial", 24, QFont.Weight.Bold))
         layout.addWidget(title, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        # === ПАРАМЕТРЫ ЭКРАНА ===
         display_group = QGroupBox("🖥️ Параметры экрана")
         display_layout = QVBoxLayout(display_group)
 
-        # Тема
         theme_layout = QHBoxLayout()
         theme_layout.addWidget(QLabel("Тема:"))
         self.theme_combo = QComboBox()
@@ -688,7 +753,6 @@ class PoleChudesApp(QMainWindow):
 
         layout.addWidget(display_group)
 
-        # Кнопка назад
         btn_back = QPushButton("Назад в меню")
         btn_back.clicked.connect(lambda: self.central_stack.setCurrentIndex(0))
         layout.addWidget(btn_back, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -703,29 +767,68 @@ class PoleChudesApp(QMainWindow):
     def init_leaderboard_screen(self):
         page = QWidget()
         layout = QVBoxLayout(page)
-        title = QLabel("Таблица лидеров")
-        title.setFont(QFont("Arial", 24, QFont.Weight.Bold))
-        layout.addWidget(title, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        title = QLabel("🏆 ТАБЛИЦА ЛИДЕРОВ 🏆")
+        title.setFont(QFont("Arial", 22, QFont.Weight.Bold))
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(title)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet("QScrollArea { border: none; background: transparent; }")
 
         self.leaderboard_text = QLabel()
         self.leaderboard_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.leaderboard_text.setStyleSheet("font-size: 16px; padding: 20px;")
-        self.update_leaderboard_display()
-        layout.addWidget(self.leaderboard_text)
+        self.leaderboard_text.setWordWrap(True)
 
-        btn_back = QPushButton("Назад в меню")
+        if self.settings["theme"] == "dark":
+            self.leaderboard_text.setStyleSheet("""
+                QLabel {
+                    font-size: 18px;
+                    padding: 30px;
+                    background-color: #1e293b;
+                    border-radius: 20px;
+                    margin: 20px;
+                    font-family: 'Arial';
+                }
+            """)
+        else:
+            self.leaderboard_text.setStyleSheet("""
+                QLabel {
+                    font-size: 18px;
+                    padding: 30px;
+                    background-color: #ffffff;
+                    border-radius: 20px;
+                    margin: 20px;
+                    font-family: 'Arial';
+                    border: 2px solid #e5e7eb;
+                }
+            """)
+
+        scroll.setWidget(self.leaderboard_text)
+        layout.addWidget(scroll)
+
+        self.update_leaderboard_display()
+
+        btn_layout = QHBoxLayout()
+
+        btn_refresh = QPushButton("🔄 Обновить")
+        btn_refresh.clicked.connect(self.update_leaderboard_display)
+
+        btn_clear = QPushButton("🗑️ Очистить всё")
+        btn_clear.setStyleSheet("background-color: #ef476f;")
+        btn_clear.clicked.connect(self.clear_leaderboard)
+
+        btn_back = QPushButton("◀ Назад в меню")
         btn_back.clicked.connect(lambda: self.central_stack.setCurrentIndex(0))
-        layout.addWidget(btn_back, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        btn_layout.addWidget(btn_refresh)
+        btn_layout.addWidget(btn_clear)
+        btn_layout.addWidget(btn_back)
+
+        layout.addLayout(btn_layout)
 
         self.central_stack.addWidget(page)
-
-    def update_leaderboard_display(self):
-        sorted_players = sorted(self.players, key=lambda x: x["score"], reverse=True)
-        text = "🏆 ТАБЛИЦА ЛИДЕРОВ 🏆\n\n"
-        for i, player in enumerate(sorted_players, 1):
-            medal = "🥇" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else "📌"
-            text += f"{medal} {player['name']}: {player['score']} очков\n"
-        self.leaderboard_text.setText(text)
 
     def init_game_screen(self):
         self.game_page = QWidget()
@@ -822,9 +925,9 @@ class PoleChudesApp(QMainWindow):
         self.game_layout.addLayout(main_content)
 
         self.central_stack.addWidget(self.game_page)
-
-        # Применяем тему после создания всех виджетов
         self.apply_theme()
+
+    # ==================== ИГРОВАЯ ЛОГИКА ====================
 
     def start_new_game(self):
         if len(self.words_db) < 3:
@@ -873,19 +976,16 @@ class PoleChudesApp(QMainWindow):
             self.player_score_labels[i].setText(f"В раунде: {self.round_scores[self.current_round][i]}")
 
     def update_word_display(self):
-        # Очищаем текущие ячейки
         for i in reversed(range(self.word_layout.count())):
             item = self.word_layout.itemAt(i)
             if item and item.widget():
                 item.widget().setParent(None)
 
-        # Создаем ячейки для каждой буквы слова
         for char in self.current_word:
             display_char = char if char in self.guessed_letters else ""
             lbl = QLabel(display_char)
             lbl.setFixedSize(54, 54)
             lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            # Стиль зависит от темы
             if self.settings["theme"] == "dark":
                 lbl.setStyleSheet("""
                     background-color: #334155;
@@ -1007,6 +1107,16 @@ class PoleChudesApp(QMainWindow):
         max_score = max(self.players, key=lambda x: x["score"])["score"]
         winners = [p for p in self.players if p["score"] == max_score]
 
+        # Проверяем, побит ли рекорд
+        leaderboard = self.load_leaderboard()
+        is_record = False
+        if leaderboard:
+            current_record = leaderboard[0]["score"] if leaderboard else 0
+            if max_score > current_record:
+                is_record = True
+        else:
+            is_record = True
+
         results_text = "РЕЗУЛЬТАТЫ:\n\n"
         for i, player in enumerate(sorted(self.players, key=lambda x: x["score"], reverse=True), 1):
             medal = "🥇" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else "📌"
@@ -1014,11 +1124,16 @@ class PoleChudesApp(QMainWindow):
 
         if len(winners) == 1:
             message = f"🏆 ПОБЕДИТЕЛЬ: {winners[0]['name']}!\n\n{results_text}"
+            if is_record:
+                message += f"\n🔥 НОВЫЙ РЕКОРД! {max_score} очков! 🔥"
         else:
             message = f"🤝 НИЧЬЯ!\n\n{results_text}"
 
         QMessageBox.information(self, "Игра окончена", message)
-        self.save_game_results()
+
+        # Сохраняем в таблицу лидеров
+        self.save_to_leaderboard()
+
         self.reset_game_state()
         self.central_stack.setCurrentIndex(0)
 
@@ -1037,19 +1152,7 @@ class PoleChudesApp(QMainWindow):
         self.toggle_alphabet(False)
         self.btn_spin.setEnabled(False)
         self.btn_full_word.setEnabled(False)
-
-    def save_game_results(self):
-        try:
-            results = []
-            if os.path.exists("game_results.json"):
-                with open("game_results.json", 'r', encoding='utf-8') as f:
-                    results = json.load(f)
-            results.append({"date": str(datetime.now()), "players": self.players, "rounds": self.round_scores})
-            with open("game_results.json", 'w', encoding='utf-8') as f:
-                json.dump(results, f, ensure_ascii=False, indent=2)
-            self.update_leaderboard_display()
-        except:
-            pass
+        self.update_leaderboard_display()
 
     def next_turn(self):
         self.current_player_idx = (self.current_player_idx + 1) % 3
