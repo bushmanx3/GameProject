@@ -255,6 +255,19 @@ class PoleChudesApp(QMainWindow):
                 }
                 QPushButton:hover { background-color: #3f7df0; }
                 QPushButton:disabled { background-color: #5a6475; color: #d8dde8; }
+
+                /* Стилизация QMessageBox и QInputDialog для тёмной темы */
+                QMessageBox, QInputDialog { background-color: #1e293b; }
+                QMessageBox QLabel, QInputDialog QLabel { color: #f5f7ff; font-size: 15px; }
+                QMessageBox QPushButton, QInputDialog QPushButton { background-color: #2d6cdf; color: white; min-width: 80px; }
+                QInputDialog QLineEdit { 
+                    background-color: #1f2937; 
+                    color: #f5f7ff; 
+                    border: 1px solid #334155; 
+                    border-radius: 6px; 
+                    padding: 5px; 
+                }
+
                 QGroupBox { 
                     font-weight: bold; 
                     border: 2px solid #334155; 
@@ -301,13 +314,8 @@ class PoleChudesApp(QMainWindow):
                         font-weight: bold;
                         border: none;
                     }
-                    QPushButton:hover {
-                        background-color: #16a34a;
-                    }
-                    QPushButton:disabled {
-                        background-color: #4ade80;
-                        color: #bbf7d0;
-                    }
+                    QPushButton:hover { background-color: #16a34a; }
+                    QPushButton:disabled { background-color: #4ade80; color: #bbf7d0; }
                 """)
 
             if hasattr(self, 'btn_full_word'):
@@ -321,13 +329,8 @@ class PoleChudesApp(QMainWindow):
                         font-weight: bold;
                         border: none;
                     }
-                    QPushButton:hover {
-                        background-color: #7c3aed;
-                    }
-                    QPushButton:disabled {
-                        background-color: #a78bfa;
-                        color: #e9d5ff;
-                    }
+                    QPushButton:hover { background-color: #7c3aed; }
+                    QPushButton:disabled { background-color: #a78bfa; color: #e9d5ff; }
                 """)
 
             if hasattr(self, 'question_frame'):
@@ -341,10 +344,7 @@ class PoleChudesApp(QMainWindow):
 
             if hasattr(self, 'lbl_sector'):
                 self.lbl_sector.setStyleSheet("""
-                    background-color: #334155;
-                    color: white;
-                    padding: 10px;
-                    border-radius: 10px;
+                    background-color: #334155; color: white; padding: 10px; border-radius: 10px;
                 """)
 
             if hasattr(self, 'round_label'):
@@ -357,36 +357,21 @@ class PoleChudesApp(QMainWindow):
                 for btn in self.alpha_buttons.values():
                     btn.setStyleSheet("""
                         QPushButton {
-                            background-color: #475569;
-                            color: white;
-                            border-radius: 10px;
-                            border: 2px solid #94a3b8;
-                            font-weight: bold;
+                            background-color: #475569; color: white; border-radius: 10px;
+                            border: 2px solid #94a3b8; font-weight: bold;
                         }
-                        QPushButton:hover {
-                            background-color: #64748b;
-                        }
-                        QPushButton:disabled {
-                            background-color: #1f2937;
-                            color: #94a3b8;
-                            border: 2px solid #334155;
-                        }
+                        QPushButton:hover { background-color: #64748b; }
+                        QPushButton:disabled { background-color: #1f2937; color: #94a3b8; border: 2px solid #334155; }
                     """)
 
             if hasattr(self, 'player_frames'):
                 for i, frame in enumerate(self.player_frames):
                     if i == self.current_player_idx:
-                        frame.setStyleSheet("""
-                            background-color: #14532d;
-                            border-radius: 12px;
-                            border: 2px solid #22c55e;
-                        """)
+                        frame.setStyleSheet(
+                            "background-color: #14532d; border-radius: 12px; border: 2px solid #22c55e;")
                     else:
-                        frame.setStyleSheet("""
-                            background-color: #1f2937;
-                            border-radius: 12px;
-                            border: 1px solid #334155;
-                        """)
+                        frame.setStyleSheet(
+                            "background-color: #1f2937; border-radius: 12px; border: 1px solid #334155;")
         else:
             # Светлая тема
             self.setStyleSheet("""
@@ -404,6 +389,21 @@ class PoleChudesApp(QMainWindow):
                 }
                 QPushButton:hover { background-color: #2980b9; }
                 QPushButton:disabled { background-color: #bdc3c7; color: #7f8c8d; }
+
+                /* Стилизация QMessageBox и QInputDialog для светлой темы — исправляет невидимый текст */
+                QMessageBox, QInputDialog { background-color: #ffffff; }
+                QMessageBox QLabel, QInputDialog QLabel { color: #1a1a2e; font-size: 15px; }
+                QMessageBox QPushButton, QInputDialog QPushButton { background-color: #3498db; color: white; min-width: 80px; }
+
+                /* Стилизация поля ввода внутри окна "Назвать слово" */
+                QInputDialog QLineEdit { 
+                    background-color: #ffffff; 
+                    color: #1a1a2e; 
+                    border: 2px solid #bdc3c7; 
+                    border-radius: 8px; 
+                    padding: 6px; 
+                }
+
                 QGroupBox { 
                     font-weight: bold; 
                     border: 2px solid #d0d3d4; 
@@ -450,13 +450,8 @@ class PoleChudesApp(QMainWindow):
                         font-weight: bold;
                         border: none;
                     }
-                    QPushButton:hover {
-                        background-color: #059669;
-                    }
-                    QPushButton:disabled {
-                        background-color: #6ee7b7;
-                        color: #ecfdf5;
-                    }
+                    QPushButton:hover { background-color: #059669; }
+                    QPushButton:disabled { background-color: #6ee7b7; color: #ecfdf5; }
                 """)
 
             if hasattr(self, 'btn_full_word'):
@@ -470,13 +465,8 @@ class PoleChudesApp(QMainWindow):
                         font-weight: bold;
                         border: none;
                     }
-                    QPushButton:hover {
-                        background-color: #7c3aed;
-                    }
-                    QPushButton:disabled {
-                        background-color: #c4b5fd;
-                        color: #ede9fe;
-                    }
+                    QPushButton:hover { background-color: #7c3aed; }
+                    QPushButton:disabled { background-color: #c4b5fd; color: #ede9fe; }
                 """)
 
             if hasattr(self, 'question_frame'):
@@ -490,11 +480,7 @@ class PoleChudesApp(QMainWindow):
 
             if hasattr(self, 'lbl_sector'):
                 self.lbl_sector.setStyleSheet("""
-                    background-color: #e0e0e0;
-                    color: #1a1a2e;
-                    padding: 10px;
-                    border-radius: 10px;
-                    font-weight: bold;
+                    background-color: #e0e0e0; color: #1a1a2e; padding: 10px; border-radius: 10px; font-weight: bold;
                 """)
 
             if hasattr(self, 'round_label'):
@@ -507,36 +493,21 @@ class PoleChudesApp(QMainWindow):
                 for btn in self.alpha_buttons.values():
                     btn.setStyleSheet("""
                         QPushButton {
-                            background-color: #ecf0f1;
-                            color: #1a1a2e;
-                            border-radius: 10px;
-                            border: 2px solid #bdc3c7;
-                            font-weight: bold;
+                            background-color: #ecf0f1; color: #1a1a2e; border-radius: 10px;
+                            border: 2px solid #bdc3c7; font-weight: bold;
                         }
-                        QPushButton:hover {
-                            background-color: #d5dbdb;
-                        }
-                        QPushButton:disabled {
-                            background-color: #e0e0e0;
-                            color: #7f8c8d;
-                            border: 2px solid #d0d3d4;
-                        }
+                        QPushButton:hover { background-color: #d5dbdb; }
+                        QPushButton:disabled { background-color: #e0e0e0; color: #7f8c8d; border: 2px solid #d0d3d4; }
                     """)
 
             if hasattr(self, 'player_frames'):
                 for i, frame in enumerate(self.player_frames):
                     if i == self.current_player_idx:
-                        frame.setStyleSheet("""
-                            background-color: #d4efdf;
-                            border-radius: 12px;
-                            border: 2px solid #27ae60;
-                        """)
+                        frame.setStyleSheet(
+                            "background-color: #d4efdf; border-radius: 12px; border: 2px solid #27ae60;")
                     else:
-                        frame.setStyleSheet("""
-                            background-color: #ffffff;
-                            border-radius: 12px;
-                            border: 2px solid #e5e7eb;
-                        """)
+                        frame.setStyleSheet(
+                            "background-color: #ffffff; border-radius: 12px; border: 2px solid #e5e7eb;")
 
     def load_questions_from_json(self):
         """Загрузка вопросов"""
