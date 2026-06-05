@@ -194,10 +194,11 @@ class PoleChudesApp(QMainWindow):
         self.central_stack = QStackedWidget()
         self.setCentralWidget(self.central_stack)
 
+        # Добавили поле "is_active": True для отслеживания статуса игрока в раунде
         self.players = [
-            {"name": "Игрок 1", "score": 0},
-            {"name": "Игрок 2", "score": 0},
-            {"name": "Игрок 3", "score": 0}
+            {"name": "Игрок 1", "score": 0, "is_active": True},
+            {"name": "Игрок 2", "score": 0, "is_active": True},
+            {"name": "Игрок 3", "score": 0, "is_active": True}
         ]
         self.current_player_idx = 0
 
@@ -834,24 +835,50 @@ class PoleChudesApp(QMainWindow):
         self.game_page = QWidget()
         self.game_layout = QVBoxLayout(self.game_page)
 
-        top_info_layout = QHBoxLayout()
-        self.round_label = QLabel("РАУНД 1")
-        self.round_label.setFont(QFont("Arial", 20, QFont.Weight.Bold))
-        top_info_layout.addWidget(self.round_label, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.score_info_label = QLabel("")
-        top_info_layout.addWidget(self.score_info_label, alignment=Qt.AlignmentFlag.AlignRight)
-        self.game_layout.addLayout(top_info_layout)
+        # === ВЕРХНЯЯ ПАНЕЛЬ С НАЗВАНИЕМ И РАУНДОМ ПО ЦЕНТРУ ===
+        header_main_layout = QHBoxLayout()
+        header_main_layout.setContentsMargins(20, 10, 20, 10)
 
-        top_hbox = QHBoxLayout()
+        # Пустышка слева для идеальной центровки заголовка
+        header_main_layout.addStretch(1)
+
+        # Центральный контейнер для Названия и Раунда
+        title_block = QVBoxLayout()
+        title_block.setSpacing(5)  # Расстояние между названием и раундом
+
         header = QLabel("Поле Чудес")
-        header.setFont(QFont("Arial", 28, QFont.Weight.Bold))
+        header.setFont(QFont("Arial", 80, QFont.Weight.Bold))  # Увеличенный шрифт
         header.setStyleSheet("color: #ffd166;")
+        header.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.round_label = QLabel("РАУНД 1")
+        self.round_label.setFont(QFont("Arial", 18, QFont.Weight.Bold))  # Шрифт для раунда чуть меньше
+        self.round_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        title_block.addWidget(header)
+        title_block.addWidget(self.round_label)
+        header_main_layout.addLayout(title_block, stretch=2)
+
+        # Правая часть: кнопка выхода и информация об очках
+        right_block = QVBoxLayout()
+        right_block.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        right_block.setSpacing(5)
+
         btn_exit_game = QPushButton("Выход")
-        btn_exit_game.setStyleSheet("background-color: #ef476f; color: white; padding: 8px 20px; border-radius: 10px;")
+        btn_exit_game.setStyleSheet(
+            "background-color: #ef476f; color: white; padding: 8px 20px; border-radius: 10px; max-width: 120px;")
         btn_exit_game.clicked.connect(lambda: self.central_stack.setCurrentIndex(0))
-        top_hbox.addWidget(header, alignment=Qt.AlignmentFlag.AlignCenter)
-        top_hbox.addWidget(btn_exit_game, alignment=Qt.AlignmentFlag.AlignRight)
-        self.game_layout.addLayout(top_hbox)
+
+        self.score_info_label = QLabel("")
+        self.score_info_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+
+        right_block.addWidget(btn_exit_game)
+        right_block.addWidget(self.score_info_label)
+
+        header_main_layout.addLayout(right_block, stretch=1)
+
+        self.game_layout.addLayout(header_main_layout)
+        # ======================================================
 
         players_hbox = QHBoxLayout()
         self.player_widgets = []
@@ -940,6 +967,7 @@ class PoleChudesApp(QMainWindow):
         self.round_questions = random.sample(self.words_db, 3)
         for i in range(3):
             self.players[i]["score"] = 0
+            self.players[i]["is_active"] = True  # Возвращаем всех в игру
         self.start_round()
 
     def start_round(self):
@@ -950,6 +978,7 @@ class PoleChudesApp(QMainWindow):
         self.current_player_idx = 0
         for i in range(3):
             self.round_scores[self.current_round][i] = 0
+            self.players[i]["is_active"] = True  # Сброс флага активности: в новом раунде снова играют ВСЕ
 
         self.game_data = self.round_questions[self.current_round]
         self.current_word = self.game_data["a"]
@@ -957,7 +986,6 @@ class PoleChudesApp(QMainWindow):
         self.current_sector = "-"
 
         self.round_label.setText(f"РАУНД {self.current_round + 1}")
-        self.score_info_label.setText(f"Слово из {len(self.current_word)} букв")
         self.lbl_question.setText(f"Вопрос: {self.game_data['q']}")
         self.lbl_sector.setText("Сектор: -")
 
@@ -1100,7 +1128,13 @@ class PoleChudesApp(QMainWindow):
             self.current_round += 1
             self.start_round()
         else:
-            QMessageBox.warning(self, "Ошибка", "Слово не угадано!")
+            # ИГРОК ОШИБСЯ: Исключаем его из текущего раунда
+            self.players[self.current_player_idx]["is_active"] = False
+            QMessageBox.warning(
+                self,
+                "Ошибка",
+                f"Слово не угадано!\n{self.players[self.current_player_idx]['name']} выбывает до конца этого раунда."
+            )
             self.next_turn()
 
     def show_final_results(self):
@@ -1140,6 +1174,7 @@ class PoleChudesApp(QMainWindow):
     def reset_game_state(self):
         for i in range(3):
             self.players[i]["score"] = 0
+            self.players[i]["is_active"] = True
         self.current_round = 0
         self.round_scores = [[0, 0, 0] for _ in range(3)]
         self.round_questions = []
@@ -1155,7 +1190,28 @@ class PoleChudesApp(QMainWindow):
         self.update_leaderboard_display()
 
     def next_turn(self):
-        self.current_player_idx = (self.current_player_idx + 1) % 3
+        """Переход хода к следующему АКТИВНОМУ игроку в раунде"""
+        # Проверяем, остался ли вообще хоть один активный игрок в раунде
+        active_players = [p for p in self.players if p["is_active"]]
+
+        if not active_players:
+            QMessageBox.information(
+                self,
+                "Раунд окончен",
+                "Все игроки выбыли из раунда, так как не угадали слово! Переходим к следующему раунду."
+            )
+            self.current_round += 1
+            self.start_round()
+            return
+
+        # Ищем следующего активного игрока по кругу
+        attempts = 0
+        while attempts < 3:
+            self.current_player_idx = (self.current_player_idx + 1) % 3
+            if self.players[self.current_player_idx]["is_active"]:
+                break
+            attempts += 1
+
         self.update_ui_state()
         self.toggle_alphabet(False)
         self.btn_spin.setEnabled(True)
@@ -1165,16 +1221,24 @@ class PoleChudesApp(QMainWindow):
         for i, lbl in enumerate(self.player_widgets):
             lbl.setText(f"Очки: {self.players[i]['score']}")
             parent = lbl.parent()
-            if self.settings["theme"] == "dark":
-                parent.setStyleSheet(
-                    f"background-color: {'#14532d' if i == self.current_player_idx else '#1f2937'}; "
-                    f"border-radius: 12px; border: 2px solid {'#22c55e' if i == self.current_player_idx else '#334155'};"
-                )
+
+            # Визуально затеняем карточку игрока, если он выбыл в этом раунде
+            if not self.players[i]["is_active"]:
+                if self.settings["theme"] == "dark":
+                    parent.setStyleSheet("background-color: #0f172a; border-radius: 12px; border: 2px dashed #334155;")
+                else:
+                    parent.setStyleSheet("background-color: #f3f4f6; border-radius: 12px; border: 2px dashed #d1d5db;")
             else:
-                parent.setStyleSheet(
-                    f"background-color: {'#d4efdf' if i == self.current_player_idx else '#ffffff'}; "
-                    f"border-radius: 12px; border: 2px solid {'#27ae60' if i == self.current_player_idx else '#e5e7eb'};"
-                )
+                if self.settings["theme"] == "dark":
+                    parent.setStyleSheet(
+                        f"background-color: {'#14532d' if i == self.current_player_idx else '#1f2937'}; "
+                        f"border-radius: 12px; border: 2px solid {'#22c55e' if i == self.current_player_idx else '#334155'};"
+                    )
+                else:
+                    parent.setStyleSheet(
+                        f"background-color: {'#d4efdf' if i == self.current_player_idx else '#ffffff'}; "
+                        f"border-radius: 12px; border: 2px solid {'#27ae60' if i == self.current_player_idx else '#e5e7eb'};"
+                    )
         self.update_round_scores_display()
 
     def toggle_alphabet(self, state):
