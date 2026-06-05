@@ -185,7 +185,7 @@ class PoleChudesApp(QMainWindow):
         self.setWindowTitle("Поле Чудес")
         self.setMinimumSize(1400, 900)
 
-        # Простые настройки (только тема)
+        # Настройки
         self.settings = {
             "theme": "dark"
         }
@@ -194,7 +194,6 @@ class PoleChudesApp(QMainWindow):
         self.central_stack = QStackedWidget()
         self.setCentralWidget(self.central_stack)
 
-        # Добавили поле "is_active": True для отслеживания статуса игрока в раунде
         self.players = [
             {"name": "Игрок 1", "score": 0, "is_active": True},
             {"name": "Игрок 2", "score": 0, "is_active": True},
@@ -207,7 +206,6 @@ class PoleChudesApp(QMainWindow):
         self.round_scores = [[0, 0, 0] for _ in range(3)]
 
         self.words_db = self.load_questions_from_json()
-        # Измененный порядок секторов - БАНКРОТ и 0 не рядом
         self.sectors = ["100", "200", "500", "БАНКРОТ", "1000", "0"]
 
         self.init_menu_screen()
@@ -295,6 +293,18 @@ class PoleChudesApp(QMainWindow):
                 }
                 QScrollArea { background: transparent; border: none; }
             """)
+
+            # Стиль текста таблицы лидеров для ТЁМНОЙ темы
+            if hasattr(self, 'leaderboard_text'):
+                self.leaderboard_text.setStyleSheet("""
+                    font-size: 18px;
+                    padding: 30px;
+                    background-color: #1e293b;
+                    color: #f5f7ff;
+                    border-radius: 20px;
+                    margin: 20px;
+                    font-family: 'Arial';
+                """)
 
             if hasattr(self, 'game_page'):
                 self.game_page.setStyleSheet("""
@@ -432,6 +442,18 @@ class PoleChudesApp(QMainWindow):
                 QScrollArea { background: transparent; border: none; }
             """)
 
+            if hasattr(self, 'leaderboard_text'):
+                self.leaderboard_text.setStyleSheet("""
+                    font-size: 18px;
+                    padding: 30px;
+                    background-color: #ffffff;
+                    color: #1a1a2e;
+                    border-radius: 20px;
+                    margin: 20px;
+                    font-family: 'Arial';
+                    border: 2px solid #e5e7eb;
+                """)
+
             if hasattr(self, 'game_page'):
                 self.game_page.setStyleSheet("""
                     background-color: #f0f2f5;
@@ -530,8 +552,7 @@ class PoleChudesApp(QMainWindow):
         except:
             return []
 
-    # ==================== ТАБЛИЦА ЛИДЕРОВ ====================
-
+    # ТАБЛИЦА ЛИДЕРОВ
     def load_leaderboard(self):
         """Загрузка таблицы лидеров из файла (только топ-3)"""
         try:
@@ -565,10 +586,8 @@ class PoleChudesApp(QMainWindow):
             "date": datetime.now().strftime("%d.%m.%Y")
         })
 
-        # Сортируем по очкам (по убыванию)
         leaderboard.sort(key=lambda x: x["score"], reverse=True)
 
-        # Оставляем только топ-3
         leaderboard = leaderboard[:3]
 
         # Сохраняем
@@ -578,10 +597,8 @@ class PoleChudesApp(QMainWindow):
         except:
             pass
 
-        # Обновляем отображение
         self.update_leaderboard_display()
 
-        # Проверяем, побит ли рекорд
         if leaderboard and winner["score"] == leaderboard[0]["score"] and len(leaderboard) > 0:
             QMessageBox.information(self, "🏆 НОВЫЙ РЕКОРД! 🏆",
                                     f"{winner['name']} установил(а) новый рекорд!\n\n"
@@ -648,7 +665,7 @@ class PoleChudesApp(QMainWindow):
             except Exception as e:
                 QMessageBox.warning(self, "Ошибка", f"Не удалось очистить таблицу: {e}")
 
-    # ==================== ЭКРАНЫ ====================
+    #ЭКРАНЫ
 
     def init_menu_screen(self):
         page = QWidget()
@@ -753,30 +770,6 @@ class PoleChudesApp(QMainWindow):
         self.leaderboard_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.leaderboard_text.setWordWrap(True)
 
-        if self.settings["theme"] == "dark":
-            self.leaderboard_text.setStyleSheet("""
-                QLabel {
-                    font-size: 18px;
-                    padding: 30px;
-                    background-color: #1e293b;
-                    border-radius: 20px;
-                    margin: 20px;
-                    font-family: 'Arial';
-                }
-            """)
-        else:
-            self.leaderboard_text.setStyleSheet("""
-                QLabel {
-                    font-size: 18px;
-                    padding: 30px;
-                    background-color: #ffffff;
-                    border-radius: 20px;
-                    margin: 20px;
-                    font-family: 'Arial';
-                    border: 2px solid #e5e7eb;
-                }
-            """)
-
         scroll.setWidget(self.leaderboard_text)
         layout.addWidget(scroll)
 
@@ -806,16 +799,14 @@ class PoleChudesApp(QMainWindow):
         self.game_page = QWidget()
         self.game_layout = QVBoxLayout(self.game_page)
 
-        # === ВЕРХНЯЯ ПАНЕЛЬ С НАЗВАНИЕМ И РАУНДОМ ПО ЦЕНТРУ ===
+        #ВЕРХНЯЯ ПАНЕЛЬ С НАЗВАНИЕМ И РАУНДОМ ПО ЦЕНТРУ
         header_main_layout = QHBoxLayout()
         header_main_layout.setContentsMargins(20, 10, 20, 10)
 
-        # Пустышка слева для идеальной центровки заголовка
         header_main_layout.addStretch(1)
 
-        # Центральный контейнер для Названия и Раунда
         title_block = QVBoxLayout()
-        title_block.setSpacing(5)  # Расстояние между названием и раундом
+        title_block.setSpacing(5)
 
         header = QLabel("Поле Чудес")
         header.setFont(QFont("Arial", 80, QFont.Weight.Bold))  # Увеличенный шрифт
@@ -823,14 +814,13 @@ class PoleChudesApp(QMainWindow):
         header.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.round_label = QLabel("РАУНД 1")
-        self.round_label.setFont(QFont("Arial", 18, QFont.Weight.Bold))  # Шрифт для раунда чуть меньше
+        self.round_label.setFont(QFont("Arial", 18, QFont.Weight.Bold))
         self.round_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         title_block.addWidget(header)
         title_block.addWidget(self.round_label)
         header_main_layout.addLayout(title_block, stretch=2)
 
-        # Правая часть: кнопка выхода и информация об очках
         right_block = QVBoxLayout()
         right_block.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         right_block.setSpacing(5)
@@ -849,7 +839,6 @@ class PoleChudesApp(QMainWindow):
         header_main_layout.addLayout(right_block, stretch=1)
 
         self.game_layout.addLayout(header_main_layout)
-        # ======================================================
 
         players_hbox = QHBoxLayout()
         self.player_widgets = []
@@ -925,7 +914,7 @@ class PoleChudesApp(QMainWindow):
         self.central_stack.addWidget(self.game_page)
         self.apply_theme()
 
-    # ==================== ИГРОВАЯ ЛОГИКА ====================
+    #ИГРОВАЯ ЛОГИКА
 
     def start_new_game(self):
         if len(self.words_db) < 3:
